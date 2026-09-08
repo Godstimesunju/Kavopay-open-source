@@ -23,6 +23,8 @@ Skip the `X-Public-Key` and your request isn't just rejected, your IP gets block
 
 Your account needs at least Tier 1 verification to use the API. Keys on Tier 0 accounts are rejected.
 
+Call this from a server or script you control, never from browser-side JavaScript. A secret key in client-side code is visible to anyone who opens dev tools.
+
 ## Endpoint
 
 `GET /v1/balance` — returns the current wallet balance for the account that owns the key.
