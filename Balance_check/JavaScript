@@ -1,0 +1,8 @@
+const res = await fetch("https://api.kavopaywalletz.com/v1/balance", {
+  headers: {
+    "X-Public-Key": "kavo_pub_xxxxxxxxxxxxxxxx",
+    Authorization: "Bearer kavo_live_xxxxxxxxxxxxxxxx"
+  }
+});
+const data = await res.json();
+console.log(data.balance);
