@@ -23,10 +23,6 @@ Skip the `X-Public-Key` and your request isn't just rejected, your IP gets block
 
 Your account needs at least Tier 1 verification to use the API. Keys on Tier 0 accounts are rejected.
 
-## Try it
-
-[Test your keys live](https://kavopaywalletz.com/try-it) against `/v1/balance` with real input fields, no code needed. The same page also sits in this folder as [`try-it.html`](./try-it.html) if you'd rather run it yourself.
-
 ## Endpoint
 
 `GET /v1/balance` — returns the current wallet balance for the account that owns the key.
