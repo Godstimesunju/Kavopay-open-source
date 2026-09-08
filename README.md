@@ -23,6 +23,10 @@ Skip the `X-Public-Key` and your request isn't just rejected, your IP gets block
 
 Your account needs at least Tier 1 verification to use the API. Keys on Tier 0 accounts are rejected.
 
+## Try it
+
+[`try-it.html`](./try-it.html) is a standalone page with real input fields for your public key and secret key. Download it and open it in your browser (or enable GitHub Pages on this repo) to test `/v1/balance` live without writing any code.
+
 ## Endpoints
 
 - [`Balance_check`](./Balance_check) — `GET /v1/balance`, returns the current wallet balance
