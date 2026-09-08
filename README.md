@@ -25,7 +25,7 @@ Your account needs at least Tier 1 verification to use the API. Keys on Tier 0 a
 
 ## Try it
 
-[Test your keys live](https://kavopaywalletz.com/try-it) against `/v1/balance` with real input fields, no code needed. The same page also sits in this repo as [`try-it.html`](./try-it.html) if you'd rather run it yourself.
+[Test your keys live](https://kavopaywalletz.com/try-it) against `/v1/balance` with real input fields, no code needed. The same page also sits in this repo as [`try-it.html`](./Balance_check/try-it.html) if you'd rather run it yourself.
 
 ## Endpoints
 
