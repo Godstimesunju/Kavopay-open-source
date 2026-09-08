@@ -25,7 +25,7 @@ Your account needs at least Tier 1 verification to use the API. Keys on Tier 0 a
 
 ## Try it
 
-[`try-it.html`](./try-it.html) is a standalone page with real input fields for your public key and secret key. Download it and open it in your browser (or enable GitHub Pages on this repo) to test `/v1/balance` live without writing any code.
+[Test your keys live](https://kavopaywalletz.com/try-it) against `/v1/balance` with real input fields, no code needed. The same page also sits in this repo as [`try-it.html`](./try-it.html) if you'd rather run it yourself.
 
 ## Endpoints
 
