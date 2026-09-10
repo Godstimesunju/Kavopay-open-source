@@ -1,1 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kavopay Integration Test</title>
+<style>
+  body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0d1420;color:#e6edf3;max-width:480px;margin:40px auto;padding:0 20px 60px}
+  h1{font-size:20px;margin-bottom:4px}
+  h2{font-size:15px;margin:32px 0 12px;border-top:1px solid #2a3542;padding-top:24px}
+  p{color:#9aa7b4;font-size:13px;line-height:1.5}
+  label{display:block;font-size:13px;color:#9aa7b4;margin:14px 0 6px}
+  input,select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #2a3542;background:#161d29;color:#e6edf3;font-family:monospace;font-size:13px;box-sizing:border-box}
+  select{font-family:-apple-system,Roboto,Arial,sans-serif}
+  button{margin-top:18px;width:100%;padding:12px;border:none;border-radius:8px;background:#14b8a6;color:#04241f;font-weight:700;font-size:14px;cursor:pointer}
+  button:disabled{opacity:.6;cursor:default}
+  pre{margin-top:16px;padding:14px;border-radius:8px;background:#161d29;border:1px solid #2a3542;font-size:12.5px;white-space:pre-wrap;word-break:break-all}
+  .status{font-weight:700}
+  .ok{color:#4ade80}
+  .err{color:#f87171}
+  .hidden{display:none}
+</style>
+</head>
+<body>
 
+<h1>Kavopay Integration Test</h1>
+<p>Pretend site of a developer integrating Kavopay. This page never calls Kavopay directly, it calls my own backend at <code>pr.godstimesunju.workers.dev</code>, which then calls Kavopay, same shape a real integration would take.</p>
+
+<label for="pub">Public key</label>
+<input id="pub" placeholder="kavo_pub_xxxxxxxxxxxxxxxx">
+
+<label for="sec">Secret key</label>
+<input id="sec" type="password" placeholder="kavo_live_xxxxxxxxxxxxxxxx">
+
+<h2>Initiate a payment</h2>
+
+<label for="amount">Amount (NGN)</label>
+<input id="amount" type="number" placeholder="5000">
+
+<label for="method">Method</label>
+<select id="method">
+  <option value="card">Card</option>
+  <option value="opay">OPay</option>
+  <option value="ussd">USSD</option>
+  <option value="bank_transfer">Bank transfer</option>
+</select>
+
+<div id="redirectField">
+  <label for="redirect">Redirect URL</label>
+  <input id="redirect" placeholder="https://yoursite.com/paid">
+</div>
+
+<div id="bankField" class="hidden">
+  <label for="bankCode">Bank</label>
+  <select id="bankCode">
+    <option value="044">Access Bank</option>
+    <option value="058">GTBank</option>
+    <option value="033">UBA</option>
+    <option value="057">Zenith Bank</option>
+    <option value="011">First Bank</option>
+    <option value="070">Fidelity</option>
+    <option value="232">Sterling</option>
+    <option value="032">Union Bank</option>
+    <option value="076">Polaris</option>
+    <option value="082">Keystone</option>
+  </select>
+</div>
+
+<button id="payBtn">Initiate payment</button>
+<pre id="payOut" class="hidden"></pre>
+
+<h2>Verify a payment</h2>
+<label for="ref">Reference</label>
+<input id="ref" placeholder="KAVO-CARD-XXXXXXXX-1736500000000">
+<button id="verifyBtn">Verify payment</button>
+<pre id="verifyOut" class="hidden"></pre>
+
+<script>
+const WORKER = "https://pr.godstimesunju.workers.dev";
+
+const methodEl  = document.getElementById("method");
+const redirectF = document.getElementById("redirectField");
+const bankF     = document.getElementById("bankField");
+
+function syncFields() {
+  const m = methodEl.value;
+  redirectF.classList.toggle("hidden", !(m === "card" || m === "opay"));
+  bankF.classList.toggle("hidden", m !== "ussd");
+}
+methodEl.addEventListener("change", syncFields);
+syncFields();
+
+function render(el, status, data) {
+  el.classList.remove("hidden");
+  const ok = status >= 200 && status < 300;
+  const label = `<span class="status ${ok ? "ok" : "err"}">${status}</span>`;
+  el.innerHTML = label + "\n\n" + JSON.stringify(data, null, 2);
+}
+
+document.getElementById("payBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("payBtn");
+  const out = document.getElementById("payOut");
+  const method = methodEl.value;
+
+  const body = {
+    publicKey: document.getElementById("pub").value.trim(),
+    secretKey: document.getElementById("sec").value.trim(),
+    amount: Number(document.getElementById("amount").value),
+    method
+  };
+  if (method === "card" || method === "opay") body.redirect_url = document.getElementById("redirect").value.trim();
+  if (method === "ussd") body.bank_code = document.getElementById("bankCode").value;
+
+  out.classList.remove("hidden");
+  out.textContent = "Loading...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${WORKER}/pay`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    render(out, res.status, data);
+  } catch (err) {
+    out.innerHTML = `<span class="status err">Network error</span>\n\n${err.message}`;
+  }
+
+  btn.disabled = false;
+});
+
+document.getElementById("verifyBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("verifyBtn");
+  const out = document.getElementById("verifyOut");
+
+  const body = {
+    publicKey: document.getElementById("pub").value.trim(),
+    secretKey: document.getElementById("sec").value.trim(),
+    reference: document.getElementById("ref").value.trim()
+  };
+
+  out.classList.remove("hidden");
+  out.textContent = "Loading...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${WORKER}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    render(out, res.status, data);
+  } catch (err) {
+    out.innerHTML = `<span class="status err">Network error</span>\n\n${err.message}`;
+  }
+
+  btn.disabled = false;
+});
+</script>
+
+</body>
+</html>
